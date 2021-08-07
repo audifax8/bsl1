@@ -1,6 +1,8 @@
+import { Query } from '@nestjs/common';
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Logger,
   Post,
@@ -90,6 +92,37 @@ export class PetController {
       };
       this.pets.push(newPet);
       return response.status(HttpStatus.CREATED).send(newPet);
+    } catch (ex) {
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Server error' });
+    }
+  }
+
+  /*@Get()
+  public get(@Query() query: any, @Res() response: Response) {
+    Logger.log(query);
+    return response.status(HttpStatus.OK).send({
+      nombre: 'get',
+      query,
+    });
+  }*/
+
+  @Get()
+  public get(@Query() query: any, @Res() response: Response) {
+    try {
+      if (!query.petId) {
+        return response.status(HttpStatus.BAD_REQUEST).send({
+          error: 'petId required',
+        });
+      }
+      const pet = this.pets.find((pet) => pet.id === parseInt(query.petId, 10));
+      if (!pet) {
+        return response.status(HttpStatus.NOT_FOUND).send({
+          error: 'Pet not found',
+        });
+      }
+      return response.status(HttpStatus.OK).send(pet);
     } catch (ex) {
       return response
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
