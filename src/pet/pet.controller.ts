@@ -18,7 +18,7 @@ export class PetController {
   /* simula una bd relacional */
 
   /* Entidad pets */
-  pets = [
+  pets: any = [
     {
       id: 1,
       name: 'Kira',
@@ -67,12 +67,33 @@ export class PetController {
 
   @Post()
   public post(@Body() body: any, @Res() response: Response) {
-    Logger.log(body);
-    if (!body.name) {
-      return response.status(HttpStatus.BAD_REQUEST).send({
-        error: 'name is required',
-      });
+    try {
+      //throw new Error();
+      Logger.log(body);
+      if (!body.name || !body.category) {
+        return response.status(HttpStatus.BAD_REQUEST).send({
+          error: 'Invalid request body',
+        });
+      }
+
+      const category = this.categories.find((cat) => cat.id === body.category);
+      Logger.debug(category);
+      if (!category) {
+        return response.status(HttpStatus.NOT_FOUND).send({
+          error: 'Category not found',
+        });
+      }
+      const newPet = {
+        name: body.name,
+        id: this.pets.length + 1,
+        category,
+      };
+      this.pets.push(newPet);
+      return response.status(HttpStatus.CREATED).send(newPet);
+    } catch (ex) {
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Server error' });
     }
-    return response.status(HttpStatus.CREATED).send();
   }
 }
