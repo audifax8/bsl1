@@ -1,6 +1,6 @@
 import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { version, name } from '../../package.json';
+//import { version, name } from '../../package.json';
 import * as os from 'os';
 
 @Controller('_health')
@@ -11,12 +11,12 @@ export class HealthController {
     const startTime = new Date(Date.now() - process.uptime()).toISOString();
     return response.status(HttpStatus.OK).send({
       available: true,
-      app: name,
+      //app: name,
       uptime: process.uptime(),
       serverId: `${hostname} ${process.pid}`,
       hostname,
       startTime,
-      version,
+      //version,
     });
   }
 }
