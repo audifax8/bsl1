@@ -25,12 +25,32 @@ export class PetController {
       id: 1,
       name: 'Kira',
       /* en este caso category es una clave foránea a la entidad categoria */
-      category: PetCategory.DOG,
+      category: 1,
     },
     {
       id: 2,
       name: 'Maison Mount',
-      category: PetCategory.CAT,
+      category: 2,
+    },
+    {
+      id: 3,
+      name: 'Rex',
+      category: 1,
+    },
+    {
+      id: 4,
+      name: 'Machi',
+      category: 2,
+    },
+    {
+      id: 5,
+      name: 'Rin tin tin',
+      category: 1,
+    },
+    {
+      id: 6,
+      name: 'Toby',
+      category: 1,
     },
   ];
 
@@ -109,6 +129,16 @@ export class PetController {
   }*/
 
   @Get()
+  public get(@Res() response: Response) {
+    return response.status(HttpStatus.OK).send({ pets: this.pets });
+  }
+
+  @Get('categories')
+  public getCategories(@Res() response: Response) {
+    return response.status(HttpStatus.OK).send({ categories: this.categories });
+  }
+
+  /*@Get()
   public get(@Query() query: any, @Res() response: Response) {
     try {
       if (!query.petId) {
@@ -128,5 +158,5 @@ export class PetController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .send({ error: 'Server error' });
     }
-  }
+  }*/
 }

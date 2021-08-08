@@ -114,6 +114,40 @@
             "description": "Server Error"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "pet"
+        ],
+        "summary": "get pets",
+        "description": "",
+        "operationId": "getPets",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "description": "get all pets objects",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PetDto"
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
       }
     }
   },
@@ -148,6 +182,26 @@
         "category": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "PetDto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "type": "string",
+          "example": "doggie"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "dog",
+            "cat"
+          ]
         }
       }
     },
