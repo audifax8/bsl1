@@ -17,6 +17,10 @@
     {
       "name": "pet",
       "description": "Everything about your Pets"
+    },
+    {
+      "name": "user",
+      "description": "Everything about your Users"
     }
   ],
   "basePath": "/",
@@ -25,6 +29,48 @@
     "http"
   ],
   "paths": {
+    "/user": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "creates an user ",
+        "description": "this end-point creates an user",
+        "operationId": "postUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Pet object that needs to be added to the store",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserPost"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/UserCreated"
+            }
+          },
+          "400": {
+            "description": "review data sent"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
     "/pet/{petId}": {
       "get": {
         "tags": [
@@ -218,6 +264,90 @@
         },
         "category": {
           "$ref": "#/definitions/Category"
+        }
+      }
+    },
+    "UserPost": {
+      "type": "object",
+      "required": [
+        "name",
+        "lastName",
+        "email",
+        "password"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Jhon"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Doe"
+        },
+        "email": {
+          "type": "string",
+          "example": "jhondoe@email.com",
+          "description": "should be a valid email"
+        },
+        "password": {
+          "type": "string",
+          "example": "Abc1234&yuy",
+          "description": "should have an uppercase, lowercase, number, special charecter and min 8 lenght"
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female"
+          ]
+        },
+        "birthDate": {
+          "type": "string",
+          "example": "2019-08-24T14:15:22Z",
+          "format": "date-time"
+        }
+      }
+    },
+    "UserCreated": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "uuid",
+          "example": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
+        },
+        "name": {
+          "type": "string",
+          "example": "Jhon"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Doe"
+        },
+        "email": {
+          "type": "string",
+          "example": "jhondoe@email.com"
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "male",
+            "female"
+          ]
+        },
+        "birthDate": {
+          "type": "string",
+          "example": "2019-08-24T14:15:22Z",
+          "format": "date-time"
+        },
+        "creationDate": {
+          "type": "string",
+          "example": "2019-08-24T14:15:22Z",
+          "format": "date-time"
+        },
+        "verifiedEmail": {
+          "type": "boolean",
+          "example": "false"
         }
       }
     },
