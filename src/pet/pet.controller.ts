@@ -15,6 +15,7 @@ import Knex from 'knex';
 import { NestjsKnexService } from 'nestjs-knexjs';
 
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 enum PetCategory {
   DOG = 'dog',
@@ -23,7 +24,7 @@ enum PetCategory {
 
 const schema = Joi.object({
   name: Joi.string().required(),
-  category: Joi.number().required(),
+  last_name: Joi.string().required(),
 });
 
 @Controller('pet')
@@ -152,29 +153,54 @@ export class PetController {
   }*/
 
   @Get()
-  public get(@Res() response: Response) {
-    /*const data = await this.knex('test').select('*');
-    const pets = this.findAll().subscribe((response) => {
-      console.log(-1);
-      console.log(response.data);
-    });
-    Logger.log({ data, pets });*/
-    return response.status(HttpStatus.OK).send({ pets: this.pets });
+  public async get(@Res() response: Response) {
+    const data = await this.knex('test').select('*');
+    //Logger.log({ data, pets });
+    return response.status(HttpStatus.OK).send({ data });
   }
 
   @Get('axios')
   public async getTask(@Res() response: Response) {
-    const data = await this.knex('test').select('*');
-    /*const request = await axios.get('https://bsl1.herokuapp.com/pet');
-    console.log(request.data.pets);*/
-    Logger.log({ data });
-    return response.status(HttpStatus.OK).send({ data });
+    //const data = await this.knex('test').select('*');
+    const requestPets = await axios.get('https://bsl1.herokuapp.com/pet');
+    const pets = requestPets.data.pets;
+    const requestCategories = await axios.get(
+      'https://bsl1.herokuapp.com/pet/categories',
+    );
+    const categorias = requestCategories.data.categories;
+    const petsWithCatName = pets.map((pet) => {
+      delete pet.id;
+      pet.category = categorias.find(
+        (category) => category.id === pet.category,
+      ).name;
+      return pet;
+    });
+    //Logger.log({ data });
+    return response.status(HttpStatus.OK).send({ petsWithCatName });
   }
 
-  @Post('exios')
-  public async postAxios(@Res() response: Response) {
-    /*const data = await this.knex('test').insert({: 'b'});
-    return response.status(HttpStatus.OK).send({ pets: this.pets });*/
+  @Post('axios')
+  public async postAxios(@Res() response: Response, @Body() body: any) {
+    try {
+      const result = schema.validate(body);
+      if (result.error) {
+        return response.status(HttpStatus.BAD_REQUEST).send({
+          error: 'Invalid request body',
+        });
+      }
+      const id = uuidv4();
+      const data = await this.knex('test').insert({
+        id,
+        last_name: body.last_name,
+        name: body.name,
+      });
+      //Logger.log(data);
+      return response.status(HttpStatus.CREATED).send({ data });
+    } catch (ex) {
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Server error' });
+    }
   }
 
   @Get('categories')
