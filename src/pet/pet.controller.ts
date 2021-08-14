@@ -1,5 +1,4 @@
 import { HttpService } from '@nestjs/axios';
-import { Query } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -14,8 +13,8 @@ import { Response } from 'express';
 import * as Joi from 'joi';
 import Knex from 'knex';
 import { NestjsKnexService } from 'nestjs-knexjs';
-import { Observable } from 'rxjs';
-import { AxiosResponse } from 'axios';
+
+import axios from 'axios';
 
 enum PetCategory {
   DOG = 'dog',
@@ -163,19 +162,19 @@ export class PetController {
     return response.status(HttpStatus.OK).send({ pets: this.pets });
   }
 
-  @Get('exios')
+  @Get('axios')
   public async getTask(@Res() response: Response) {
     const data = await this.knex('test').select('*');
-    const pets = this.findAll().subscribe((response) => {
-      console.log(-1);
-      console.log(response.data);
-    });
-    Logger.log({ data, pets });
-    return response.status(HttpStatus.OK).send({ pets: this.pets });
+    /*const request = await axios.get('https://bsl1.herokuapp.com/pet');
+    console.log(request.data.pets);*/
+    Logger.log({ data });
+    return response.status(HttpStatus.OK).send({ data });
   }
 
-  findAll(): Observable<AxiosResponse<any[]>> {
-    return this.httpService.get('https://bsl1.herokuapp.com/pet');
+  @Post('exios')
+  public async postAxios(@Res() response: Response) {
+    /*const data = await this.knex('test').insert({: 'b'});
+    return response.status(HttpStatus.OK).send({ pets: this.pets });*/
   }
 
   @Get('categories')
