@@ -26,6 +26,10 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/serve-static": "^2.2.2",
     "cors": "^2.8.5",
+    "joi": "^17.4.2",
+    "knex": "^0.21.21",
+    "mysql": "^2.18.1",
+    "nestjs-knexjs": "^1.0.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

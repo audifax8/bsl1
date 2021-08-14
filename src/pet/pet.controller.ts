@@ -10,10 +10,19 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+import * as Joi from 'joi';
+import Knex from 'knex';
+import { NestjsKnexService } from 'nestjs-knexjs';
+
 enum PetCategory {
   DOG = 'dog',
   CAT = 'cat',
 }
+
+const schema = Joi.object({
+  name: Joi.string().required(),
+  category: Joi.number().required(),
+});
 
 @Controller('pet')
 export class PetController {
@@ -66,6 +75,8 @@ export class PetController {
     },
   ];
 
+  private readonly knex: Knex = null;
+
   /* esto simula una bd no relacional, como Mongo */
   noRelationalPets = [
     {
@@ -87,12 +98,19 @@ export class PetController {
     },
   ];
 
+  constructor(private nestjsKnexService: NestjsKnexService) {
+    this.knex = this.nestjsKnexService.getKnexConnection();
+  }
+
   @Post()
   public post(@Body() body: any, @Res() response: Response) {
     try {
       //throw new Error();
-      Logger.log(body);
-      if (!body.name || !body.category) {
+      //Logger.log(body);
+      const result = schema.validate(body);
+      console.log(body);
+      Logger.log({ result });
+      if (result.error) {
         return response.status(HttpStatus.BAD_REQUEST).send({
           error: 'Invalid request body',
         });
@@ -129,8 +147,10 @@ export class PetController {
   }*/
 
   @Get()
-  public get(@Res() response: Response) {
-    return response.status(HttpStatus.OK).send({ pets: this.pets });
+  public async get(@Res() response: Response) {
+    const data = await this.knex('test').select('*');
+    Logger.log({ data });
+    return response.status(HttpStatus.OK).send({ data });
   }
 
   @Get('categories')
