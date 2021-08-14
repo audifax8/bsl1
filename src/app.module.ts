@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { HealthController } from './health/health.controller';
 import { PetController } from './pet/pet.controller';
 import { NestjsKnexModule } from 'nestjs-knexjs';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { NestjsKnexModule } from 'nestjs-knexjs';
         port: 3306,
       },
     }),
+    HttpModule,
   ],
   controllers: [AppController, HealthController, PetController],
   providers: [AppService],
