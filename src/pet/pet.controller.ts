@@ -2,9 +2,11 @@ import { HttpService } from '@nestjs/axios';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Logger,
+  Param,
   Post,
   Res,
 } from '@nestjs/common';
@@ -152,11 +154,25 @@ export class PetController {
     });
   }*/
 
+  @Delete(':id')
+  public async delete(@Res() response: Response, @Param() params) {
+    console.log(params.id);
+    try {
+      const data = await this.knex('test').del().where({ id: params.id });
+      return response.sendStatus(HttpStatus.OK).send(data);
+    } catch (ex) {
+      console.log(ex);
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Server error' });
+    }
+  }
+
   @Get()
   public async get(@Res() response: Response) {
     const data = await this.knex('test').select('*');
     //Logger.log({ data, pets });
-    return response.status(HttpStatus.OK).send({ data });
+    return response.status(HttpStatus.OK).send(data);
   }
 
   @Get('axios')
