@@ -170,7 +170,8 @@ export class PetController {
 
   @Get()
   public async get(@Res() response: Response) {
-    const data = await this.knex('test').select('*');
+    //const data = await this.knex('test').select('*');
+    const data = this.pets;
     //Logger.log({ data, pets });
     return response.status(HttpStatus.OK).send(data);
   }
