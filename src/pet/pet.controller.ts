@@ -27,6 +27,11 @@ enum PetCategory {
 const schema = Joi.object({
   name: Joi.string().required(),
   last_name: Joi.string().required(),
+  password: Joi.string()
+    .pattern(
+      new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})'),
+    )
+    .required(),
 });
 
 @Controller('pet')
@@ -200,9 +205,13 @@ export class PetController {
   public async postAxios(@Res() response: Response, @Body() body: any) {
     try {
       const result = schema.validate(body);
+      /*const strongRegex = new RegExp(
+        '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})',
+      );
+      console.log(strongRegex.test(body.password));*/
       if (result.error) {
         return response.status(HttpStatus.BAD_REQUEST).send({
-          error: 'Invalid request body',
+          error: result.error,
         });
       }
       const id = uuidv4();
