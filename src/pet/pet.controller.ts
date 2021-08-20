@@ -9,6 +9,7 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -18,15 +19,34 @@ import { NestjsKnexService } from 'nestjs-knexjs';
 
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
+
+import * as jwt from 'jwt-simple';
+import * as moment from 'moment';
+import { AuthGuard } from 'src/auth.guard';
 
 enum PetCategory {
   DOG = 'dog',
   CAT = 'cat',
 }
 
+const saltRounds = 10;
+
+const SUPER_SECRET_KEY = 'SUPER_SECRET_KEY';
+
 const schema = Joi.object({
   name: Joi.string().required(),
   last_name: Joi.string().required(),
+  email: Joi.string().required(),
+  password: Joi.string()
+    .pattern(
+      new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})'),
+    )
+    .required(),
+});
+
+const loginSchema = Joi.object({
+  email: Joi.string().required(),
   password: Joi.string()
     .pattern(
       new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})'),
@@ -182,10 +202,11 @@ export class PetController {
   }
 
   @Get('axios')
+  @UseGuards(new AuthGuard())
   public async getTask(@Res() response: Response) {
     //const data = await this.knex('test').select('*');
     const requestPets = await axios.get('https://bsl1.herokuapp.com/pet');
-    const pets = requestPets.data.pets;
+    const pets = requestPets.data;
     const requestCategories = await axios.get(
       'https://bsl1.herokuapp.com/pet/categories',
     );
@@ -201,6 +222,55 @@ export class PetController {
     return response.status(HttpStatus.OK).send({ petsWithCatName });
   }
 
+  private createToken(user) {
+    const payload = {
+      sub: user.id,
+      iat: moment().unix(),
+      //exp: moment().add(10, 'second').unix(),
+      exp: moment().add(1, 'minute').unix(),
+    };
+    return jwt.encode(payload, SUPER_SECRET_KEY);
+  }
+
+  @Post('login')
+  public async postLogin(@Res() response: Response, @Body() body: any) {
+    try {
+      const result = loginSchema.validate(body);
+      if (result.error) {
+        return response.status(HttpStatus.BAD_REQUEST).send({
+          error: result.error,
+        });
+      }
+
+      const bdResult = await this.knex('test').where({ email: body.email });
+      if (!bdResult.length) {
+        return response.status(HttpStatus.NOT_FOUND).send({
+          error: 'user or password invalid',
+        });
+      }
+
+      const user = bdResult[0];
+      const isValidPassword = bcrypt.compareSync(body.password, user.password);
+
+      if (!isValidPassword) {
+        return response.status(HttpStatus.NOT_FOUND).send({
+          error: 'user or password invalid',
+        });
+      }
+
+      const token = this.createToken(user);
+      delete user.password;
+      user.token = token;
+
+      console.log({ user, isValidPassword });
+      return response.status(HttpStatus.OK).send({ user });
+    } catch (ex) {
+      return response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: ex.message });
+    }
+  }
+
   @Post('axios')
   public async postAxios(@Res() response: Response, @Body() body: any) {
     try {
@@ -214,18 +284,26 @@ export class PetController {
           error: result.error,
         });
       }
+
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hashedPassword = bcrypt.hashSync(body.password, salt);
+      console.log({ hashedPassword });
+
       const id = uuidv4();
-      const data = await this.knex('test').insert({
+      const data = {
         id,
         last_name: body.last_name,
         name: body.name,
-      });
+        password: hashedPassword,
+        email: body.email,
+      };
+      await this.knex('test').insert(data);
       //Logger.log(data);
       return response.status(HttpStatus.CREATED).send({ data });
     } catch (ex) {
       return response
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send({ error: 'Server error' });
+        .send({ error: ex.message });
     }
   }
 
