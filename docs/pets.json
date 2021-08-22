@@ -133,6 +133,12 @@
         ],
         "parameters": [
           {
+            "name": "bearer",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
             "in": "body",
             "name": "body",
             "description": "Pet object that needs to be added to the store",
@@ -195,6 +201,54 @@
           }
         }
       }
+    },
+    "/pet/login": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "login",
+        "description": "",
+        "operationId": "login",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "data to login",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserLogin"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserDto"
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "bearer": {
+    "type": "bearer",
+    "name": "bearer",
+    "in": "header"
     }
   },
   "definitions": {
@@ -228,6 +282,52 @@
         "category": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "UserLogin": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "example": "jhondoe@email.com",
+          "description": "should be a valid email"
+        },
+        "password": {
+          "type": "string",
+          "example": "Abc1234&yuy",
+          "description": "should have an uppercase, lowercase, number, special charecter and min 8 lenght"
+        }
+      }
+    },
+    "UserDto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "example": "doggie"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "example": "test@email.com"
+        },
+        "lastConnection": {
+          "type": "string",
+          "example": "Hola por primera vez"
+        },
+        "token": {
+          "type": "string",
+          "example": "logged token"
         }
       }
     },
