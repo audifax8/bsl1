@@ -191,7 +191,7 @@ export class PetController {
   }
 
   @Get()
-  @UseGuards(new AuthGuard())
+  //@UseGuards(new AuthGuard())
   public async get(@Res() response: Response) {
     //const data = await this.knex('test').select('*');
     const data = this.pets;
